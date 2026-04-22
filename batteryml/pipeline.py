@@ -111,12 +111,18 @@ class Pipeline:
         ts = timestamp()
 
         if self.config['workspace'] is not None:
+            if isinstance(prediction, torch.Tensor):
+                prediction_to_save = prediction.detach().cpu().numpy()
+            else:
+                prediction_to_save = prediction
+
             obj = {
-                'prediction': prediction,
+                'prediction': prediction_to_save,
                 'scores': scores,
-                'data': dataset.to('cpu'),
                 'seed': seed,
+                'timestamp': ts,
             }
+
             filename = f'predictions_seed_{seed}_{ts}.pkl'
             with open(Path(self.config['workspace']) / filename, 'wb') as f:
                 pickle.dump(obj, f)
